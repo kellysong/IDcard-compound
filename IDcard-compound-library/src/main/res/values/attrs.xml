@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <declare-styleable name="ArrowStepView">
+        <attr name="asv_circle_radius" format="dimension"/>
+        <attr name="asv_circle_text_size" format="dimension"/>
+        <attr name="asv_title_size" format="dimension"/>
+        <attr name="asv_text_color" format="color"/>
+        <attr name="asv_height" format="dimension"/>
+        <attr name="asv_triangle_width" format="dimension"/>
+        <attr name="asv_text_margin_left" format="dimension"/>
+        <attr name="asv_current_select_color" format="color"/>
+        <attr name="asv_default_select_color" format="color"/>
+        <attr name="asv_current_select_step" format="integer"/>
+
+    </declare-styleable>
+</resources>

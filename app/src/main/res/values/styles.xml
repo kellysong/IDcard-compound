@@ -1,0 +1,13 @@
+<resources>
+
+    <!-- 使用这个Theme.AppCompat.Light.DarkActionBar导致预览布局时显示ActionBarOverlayLayout -->
+    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+
+
+</resources>
