@@ -53,6 +53,8 @@ public class IdCardActivity extends AppCompatActivity {
             public void onSuccess(IdentityCard identityCard) {
                 Bitmap frontBitmap = identityCard.getFrontBitmap();
                 Bitmap backBitmap = identityCard.getBackBitmap();
+//                String frontImageBase64 = identityCard.getFrontImageBase64();
+//                String backImageBase64 = identityCard.getBackImageBase64();
                 iv_front.setImageBitmap(BitmapUtils.scaleBitmap(frontBitmap, 1.2f));
 
                 iv_back.setImageBitmap(BitmapUtils.scaleBitmap(backBitmap, 1.2f));
@@ -78,6 +80,7 @@ public class IdCardActivity extends AppCompatActivity {
             @Override
             public void onSuccess(IdentityCard identityCard) {
                 Bitmap fullBitmap = identityCard.getFullBitmap();
+//                String fullBitmapBase64 = identityCard.getFullBitmapBase64();
                 iv_full.setImageBitmap(BitmapUtils.scaleBitmap(fullBitmap, 1.2f));
             }
 

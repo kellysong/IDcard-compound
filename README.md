@@ -3,6 +3,7 @@
 	1. 支持根据基本信息合成身份证正反面  
 	2. 支持身份证正反面合成在一页
 # 效果图
+demo下载[app-debug.apk](app-debug.apk) 
 <img src="https://github.com/kellysong/IDcard-compound/blob/master/screenshot/20190416105527.png" width="30%" alt="加载中..."/>
 # 引用
 
@@ -45,7 +46,7 @@ release | 释放内存
 	//初始化合成实例
 	IdentityCardHandler identityCardHandler = IdentityCardHandler.getInstance(this);
 
-### 合成调用
+### 2.合成调用
 
 1. 根据基本信息合成身份证正反面
 
@@ -61,6 +62,8 @@ release | 释放内存
 				// TODO 合成成功后调用，返回合成后的身份实体
                  Bitmap frontBitmap = identityCard.getFrontBitmap();//正面
                  Bitmap backBitmap = identityCard.getBackBitmap();//反面
+     			 String frontImageBase64 = identityCard.getFrontImageBase64();//正面base64
+                 String backImageBase64 = identityCard.getBackImageBase64();//反面base64
 
             }
 
@@ -81,6 +84,8 @@ release | 释放内存
             public void onSuccess(IdentityCard identityCard) {
 				// TODO 合成成功后调用，返回合成后的身份实体
                	Bitmap fullBitmap = identityCard.getFullBitmap();//正反合并页
+                String fullBitmapBase64 = identityCard.getFullBitmapBase64();//正反base64
+
 
             }
 
