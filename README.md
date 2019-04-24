@@ -3,7 +3,7 @@
 	1. 支持根据基本信息合成身份证正反面  
 	2. 支持身份证正反面合成在一页
 # 效果图
-demo下载[app-debug.apk](app-debug.apk) 
+demo下载[app-debug.apk](app-debug.apk)   
 <img src="https://github.com/kellysong/IDcard-compound/blob/master/screenshot/20190416105527.png" width="30%" alt="加载中..."/>
 # 引用
 

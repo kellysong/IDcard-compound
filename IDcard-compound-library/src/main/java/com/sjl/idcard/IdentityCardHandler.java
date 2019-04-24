@@ -426,7 +426,7 @@ public class IdentityCardHandler {
         String idCardNo = identityCard.getIdCardNo();
         Bitmap photo = decodeStream(FRONT_IMAGE_PATH);
         if (photo == null) {
-            return null;
+            throw new NullPointerException("front template is null.");
         }
         int width = photo.getWidth(), height = photo.getHeight();
         frontBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888); // 建立一个空的BItMap
@@ -456,21 +456,27 @@ public class IdentityCardHandler {
     private String buildBackImage(IdentityCard identityCard) {
         String police = identityCard.getPolice();
         String expiryDate = identityCard.getExpiryDate();
-        if (TextUtils.isEmpty(expiryDate)) {
-            Log.i(TAG, "有效日期为空");
-            return null;
+        String fullExpiryDate;
+        if (!expiryDate.contains("长期")){
+            if (expiryDate.length() != 16) {
+                Log.w(TAG, "有效日期不符合长度不对或格式非法");
+                throw new IllegalArgumentException("expiryDate is an incorrect length or invalid format.");
+            }
+            String beginDate = expiryDate.substring(0, 8);
+            String endDate = expiryDate.substring(8, expiryDate.length());
+            fullExpiryDate = formatExpiryDate(beginDate) + "-" + formatExpiryDate(endDate);
+        }else {
+            if (expiryDate.length() != 10) {
+                Log.w(TAG, "有效日期不符合长度不对或格式非法");
+                throw new IllegalArgumentException("expiryDate is an incorrect length or invalid format.");
+            }
+            String beginDate = expiryDate.substring(0, 8);
+            fullExpiryDate = formatExpiryDate(beginDate) + "-长期";
         }
-        if (expiryDate.length() != 16) {
-            Log.i(TAG, "有效日期不符合长度");
-            return null;
-        }
-        String beginDate = expiryDate.substring(0, 8);
-        String endDate = expiryDate.substring(8, expiryDate.length());
-        String fullExpiryDate = formatExpiryDate(beginDate) + "-" + formatExpiryDate(endDate);
 
         Bitmap photo = decodeStream(BACK_IMAGE_PATH);
         if (photo == null) {
-            return null;
+            throw new NullPointerException("back template is null.");
         }
         int width = photo.getWidth(), height = photo.getHeight();
         backBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888); // 建立一个空的BItMap
