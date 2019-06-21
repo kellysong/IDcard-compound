@@ -71,7 +71,7 @@ public class IdCardActivity extends AppCompatActivity {
     public void compoundTest2(View view) {
         IdentityCard identityCard = getIDCardInfo();
         IdentityCardHandler identityCardHandler = IdentityCardHandler.getInstance(this);
-        identityCardHandler.compound(true, identityCard, new CompoundListener() {
+        identityCardHandler.compound(true,identityCard, new CompoundListener() {
             @Override
             public void onStart() {
 
@@ -79,6 +79,11 @@ public class IdCardActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(IdentityCard identityCard) {
+//                Bitmap frontBitmap = identityCard.getFrontBitmap();
+//                Bitmap backBitmap = identityCard.getBackBitmap();
+//                String frontImageBase64 = identityCard.getFrontImageBase64();
+//                String backImageBase64 = identityCard.getBackImageBase64();
+
                 Bitmap fullBitmap = identityCard.getFullBitmap();
 //                String fullBitmapBase64 = identityCard.getFullBitmapBase64();
                 iv_full.setImageBitmap(BitmapUtils.scaleBitmap(fullBitmap, 1.2f));

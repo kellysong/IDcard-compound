@@ -21,7 +21,7 @@ Add it in your root build.gradle at the end of repositories:
 ##Step 2. Add the dependency
 
 	dependencies {
-		        implementation 'com.github.kellysong:IDcard-compound:1.0.0'
+		        implementation 'com.github.kellysong:IDcard-compound:1.0.2'
 		}
 
 或者引用本地lib
@@ -33,8 +33,9 @@ Add it in your root build.gradle at the end of repositories:
 
 方法 | 描述
 ---- | ----
-configParams | 配置合成参数，缺省
+outSdCardFlag | 合成图片是否输出SD卡
 compound | 合成，异步调用
+syncCompound | 合成，同步调用（耗时，方便结合rxjava）
 release | 释放内存
 
 ## 使用步骤

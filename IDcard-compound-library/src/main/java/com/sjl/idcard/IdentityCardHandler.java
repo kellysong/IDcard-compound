@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.sjl.idcard.entity.CompoundResult;
 import com.sjl.idcard.entity.IdentityCard;
 import com.sjl.idcard.listener.CompoundListener;
 import com.sjl.idcard.util.BitmapUtils;
@@ -28,8 +29,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 身份证正反面合成处理类
@@ -189,10 +188,6 @@ public class IdentityCardHandler {
     private Paint fontPaint;
     private Context context;
 
-    /**
-     * 合成标志,false不合成身份证正反面(仅输出基本信息)，true合成身份证正反面，默认true
-     */
-    private boolean compoundFlag = true;
 
     /**
      * true输出合成文件到sd卡，false不输出，默认false
@@ -230,7 +225,6 @@ public class IdentityCardHandler {
     }
 
 
-
     /**
      * 初始化字体画笔
      */
@@ -242,46 +236,48 @@ public class IdentityCardHandler {
 
     }
 
+
     /**
-     * 配置合成参数
+     * 输出sd卡标志
      *
-     * @param compoundFlag  false不合成身份证正反面(仅输出基本信息)，true合成身份证正反面，默认true
      * @param outSdCardFlag true输出合成文件到sd卡，false不输出，默认false
      * @return
      */
-    public IdentityCardHandler configParams(boolean compoundFlag, boolean outSdCardFlag) {
-        this.compoundFlag = compoundFlag;
+    public IdentityCardHandler outSdCardFlag(boolean outSdCardFlag) {
         this.outSdCardFlag = outSdCardFlag;
         return this;
     }
 
-
     /**
-     * 合成身份证（仅输出正反面数据）
+     * 异步合成身份证，输出包括基本信息，图片位图，图片base64
      * <p style="color:red;">输出的本地图片（路径：/storage/emulated/0/应用包名/identitycard/）及位图都是原始身份证标准宽高,如果需要在xml布局显示，可以对位图进行一定比例缩放</p>
      *
      * @param identityCard     身份证实体
      * @param compoundListener 合成回调
      */
-    public void compound(IdentityCard identityCard, CompoundListener compoundListener) {
+    public void compound(IdentityCard identityCard, final CompoundListener compoundListener) {
         compound(false, identityCard, compoundListener);
     }
 
     /**
-     * 合成身份证
+     * 异步合成身份证，输出包括基本信息，图片位图，图片base64
+     * <p style="color:red;">输出的本地图片（路径：/storage/emulated/0/应用包名/identitycard/）及位图都是原始身份证标准宽高,如果需要在xml布局显示，可以对位图进行一定比例缩放</p>
      *
-     * @param mergeBitmapFlag  合成位图标志，false不合成，输出正反面数据;true身份证正反面合成一页， 输出全量数据
+     * @param mergeBitmapFlag  合并位图标志， false合成身份证正反面(输出基本信息，正面反面位图，正面反面图片base64,但不包括正反面合并数据)，true输出所有数据，默认false
      * @param identityCard     身份证实体
      * @param compoundListener 合成回调
      */
-    public void compound(final boolean mergeBitmapFlag, final IdentityCard identityCard, final CompoundListener compoundListener) {
+    public void compound(final boolean mergeBitmapFlag, IdentityCard identityCard, final CompoundListener compoundListener) {
         if (identityCard == null) {
             if (compoundListener != null) {
                 compoundListener.onFailed(new Exception("identityCard is null."));
+            } else {
+                throw new NullPointerException("identityCard is null.");
             }
+            return;
         }
         resetFontPaint();
-        new AsyncTask<IdentityCard, Void, Map<String, Object>>() {
+        new AsyncTask<IdentityCard, Void, CompoundResult>() {
             @Override
             protected void onPreExecute() {
                 if (compoundListener != null) {
@@ -290,80 +286,71 @@ public class IdentityCardHandler {
             }
 
             @Override
-            protected Map<String, Object> doInBackground(IdentityCard... params) {
-                Map<String, Object> result = new HashMap<String, Object>();
-                if (params.length == 1) {
-                    IdentityCard temp = params[0];
-                    try {
-                        if (!compoundFlag) {
-                            String headImage = buildHeadImage(identityCard);
-                            if (headImage == null) {
-                                result.put("code", "-1");
-                                result.put("msg", "headImage is null.");
-                                return result;
-                            }
-                            temp.setHeadImageBase64(headImage);
-                        } else {
-                            String headImage = buildHeadImage(identityCard);
-                            String frontImage = buildFrontImage(identityCard);
-                            String backImage = buildBackImage(identityCard);
-                            if (headImage == null) {
-                                Log.i(TAG, "头像headImage为空");
-                                result.put("code", "-1");
-                                result.put("msg", "headImage is null.");
-                                return result;
-                            }
-                            if (frontImage == null) {
-                                Log.i(TAG, "正面frontImage身份证为空");
-                                result.put("code", "-1");
-                                result.put("msg", "frontImage  is null.");
-                                return result;
-                            }
-                            if (backImage == null) {
-                                Log.i(TAG, "反面backImage身份证为空");
-                                result.put("code", "-1");
-                                result.put("msg", "backImage is null.");
-                                return result;
-                            }
-                            temp.setHeadImageBase64(headImage);
-                            temp.setFrontImageBase64(frontImage);
-                            temp.setBackImageBase64(backImage);
-                            if (mergeBitmapFlag) {
-                                temp.setHeadImageBase64(headImage);
-                                temp.setFrontImageBase64(frontImage);
-                                temp.setBackImageBase64(backImage);
-                                fullBitmap = mergeBitmap(temp.getFrontBitmap(), temp.getBackBitmap());
-                                String fullBase64 = BitmapUtils.bitmapToBase64(fullBitmap, 100);
-                                identityCard.setFullBitmap(fullBitmap);
-                                identityCard.setFullBitmapBase64(fullBase64);
-                            }
-                        }
-                        result.put("code", "0");
-                        result.put("identityCard", temp);
-                    } catch (Exception e) {
-                        result.put("code", "-1");
-                        result.put("msg", e.getMessage());
-                    }
-                }
-                return result;
+            protected CompoundResult doInBackground(IdentityCard... params) {
+                IdentityCard temp = params[0];
+                return syncCompound(mergeBitmapFlag, temp);
             }
 
             @Override
-            protected void onPostExecute(Map<String, Object> result) {
-                Object code = result.get("code");
-                if ("0".equals(code)) {
+            protected void onPostExecute(CompoundResult result) {
+                int code = result.getCode();
+                if (code == 0) {
                     if (compoundListener != null) {
-                        compoundListener.onSuccess((IdentityCard) result.get("identityCard"));
+                        compoundListener.onSuccess(result.getIdentityCard());
                     }
                 } else {
                     if (compoundListener != null) {
-                        compoundListener.onFailed(new Exception(result.get("msg").toString()));
+                        compoundListener.onFailed(new Exception(result.getMsg()));
                     }
                 }
             }
 
         }.execute(identityCard);
 
+    }
+
+    /**
+     * 同步合成身份证
+     *
+     * @param identityCard    身份证实体
+     * @return CompoundResult
+     */
+    public CompoundResult syncCompound(IdentityCard identityCard) {
+        return syncCompound(false, identityCard);
+    }
+
+    /**
+     * 同步合成身份证
+     *
+     * @param mergeBitmapFlag 合并位图标志， false合成身份证正反面(输出基本信息，正面反面位图，正面反面图片base64,但不包括正反面合并数据)，true输出所有数据，默认false
+     * @param identityCard    身份证实体
+     * @return CompoundResult
+     */
+    public CompoundResult syncCompound(boolean mergeBitmapFlag, IdentityCard identityCard) {
+        try {
+            String headImage = buildHeadImage(identityCard);
+            if (headImage == null) {
+                return CompoundResult.build(-1, "compound failed:params is headImageByte or headImage params is null.");
+            }
+            String frontImage = buildFrontImage(identityCard);
+            String backImage = buildBackImage(identityCard);
+            identityCard.setHeadImageBase64(headImage);
+            identityCard.setFrontImageBase64(frontImage);
+            identityCard.setBackImageBase64(backImage);
+            if (mergeBitmapFlag) {
+                fullBitmap = mergeBitmap(identityCard.getFrontBitmap(), identityCard.getBackBitmap());
+                String fullBase64 = BitmapUtils.bitmapToBase64(fullBitmap, 100);
+                identityCard.setFullBitmap(fullBitmap);
+                identityCard.setFullBitmapBase64(fullBase64);
+            } else {
+                identityCard.setFullBitmap(null);
+                identityCard.setFullBitmapBase64(null);
+            }
+            return CompoundResult.build(0, "compound success.", identityCard);
+        } catch (Exception e) {
+            Log.i(TAG, "compound failed.", e);
+            return CompoundResult.build(-1, "compound failed:" + e.getMessage());
+        }
     }
 
 
@@ -457,7 +444,7 @@ public class IdentityCardHandler {
         String police = identityCard.getPolice();
         String expiryDate = identityCard.getExpiryDate();
         String fullExpiryDate;
-        if (!expiryDate.contains("长期")){
+        if (!expiryDate.contains("长期")) {
             if (expiryDate.length() != 16) {
                 Log.w(TAG, "有效日期不符合长度不对或格式非法");
                 throw new IllegalArgumentException("expiryDate is an incorrect length or invalid format.");
@@ -465,7 +452,7 @@ public class IdentityCardHandler {
             String beginDate = expiryDate.substring(0, 8);
             String endDate = expiryDate.substring(8, expiryDate.length());
             fullExpiryDate = formatExpiryDate(beginDate) + "-" + formatExpiryDate(endDate);
-        }else {
+        } else {
             if (expiryDate.length() != 10) {
                 Log.w(TAG, "有效日期不符合长度不对或格式非法");
                 throw new IllegalArgumentException("expiryDate is an incorrect length or invalid format.");
